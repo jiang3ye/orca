@@ -73,6 +73,25 @@ describe('plugin.request', () => {
 })
 
 describe('panel storage and settings', () => {
+  it('marks plugin setting changes at the host boundary and refuses a forged native origin', async () => {
+    const panels = bridge()
+    expect(await call('settings.set', { key: 'pageSize', value: 50 }, { panels })).toEqual({
+      ok: true,
+      value: { ok: true }
+    })
+    expect(panels.dataChanged).toHaveBeenCalledWith('acme.todos', 'settings', 'pageSize', 'plugin')
+    expect(
+      await call(
+        'settings.set',
+        {
+          key: 'pageSize',
+          value: 10,
+          origin: 'settings-ui'
+        },
+        { panels }
+      )
+    ).toMatchObject({ ok: false, code: 'invalid_params' })
+  })
   it('keeps the capability gate for panels', async () => {
     await expect(call('storage.get', { key: 'todos' }, { grants: [] })).resolves.toMatchObject({
       code: 'capability_denied'
