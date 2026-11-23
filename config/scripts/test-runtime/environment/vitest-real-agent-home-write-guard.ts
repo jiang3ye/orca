@@ -45,7 +45,8 @@ function normalize(path: string): string {
 }
 
 // Some agents create worktrees inside their homes; the guard can't tell such a checkout's files from agent state.
-const checkoutRoot = normalize(fileURLToPath(new URL('../../../../', import.meta.url))) + sep
+// Why `dirname`: Vite rewrites the `new URL(path, import.meta.url)` asset idiom to a module-server URL in DOM-environment files.
+const checkoutRoot = normalize(resolve(import.meta.dirname, '../../../..')) + sep
 
 function realHomes(): string[] {
   const homes = [process.env.HOME, process.env.USERPROFILE]
